@@ -26,7 +26,7 @@ class Queue {
     }
 
     _averageTime() {
-        const diff = this._out.map((item, i) => item - this._in[i]);
+        const diff = this._in.map((item, i) => Math.abs(item - (this._out[i] || 480)));
 
         return diff.reduce((sum, cur) => sum + cur, 0) / diff.length;
     }

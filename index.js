@@ -1,6 +1,6 @@
 const _ = require('lodash');
 
-const {DUniform, Exponential} = require('./libs/distribution');
+const {DUniform, Exponential, Uniform} = require('./libs/distribution');
 const Blocks = require('./libs/blocks');
 const Storage = require('./libs/storage');
 const Queue = require('./libs/queue');
@@ -9,13 +9,13 @@ let CCE = [];
 let CFE = [];
 const FREE = [];
 
-const CARS = new Storage(3);
+const CARS = new Storage(200);
 
 const QRequest = new Queue();
 const QWaitCar = new Queue();
 const QTripTime = new Queue();
 
-const WORKING_DAY_TIME = 6;
+const WORKING_DAY_TIME = 480;
 
 function sortedByTime(CFE) {
     return _.sortBy(CFE, (transact) => transact.time);
@@ -132,9 +132,9 @@ function sortedByTime(CFE) {
         for (let i = 0; i < copyCCE.length; i++) {
             let currentTransact = copyCCE[i];
 
-            console.log('---------');
-            console.log(currentTransact);
-            console.log('STAGES:');
+            // console.log('---------');
+            // console.log(currentTransact);
+            // console.log('STAGES:');
 
             let {
                 time,
@@ -162,7 +162,7 @@ function sortedByTime(CFE) {
                 currentBlock = currentTransact.currentBlock;
                 nextBlock = currentTransact.nextBlock;
 
-                console.log(nameBlocks[nextBlock], nextBlock);
+                //console.log(nameBlocks[nextBlock], nextBlock);
 
                 const {
                     isNextBlock,
@@ -186,7 +186,7 @@ function sortedByTime(CFE) {
                     CFE = sortedByTime(CFE);
                 }
 
-                // delay - остановка в связи с занятостью устройства - не убирать транзакт и ЦТС
+                // delay - остановка в связи с занятостью устройства - не убирать транзакт из ЦТС
                 if (!isNextBlock && delay) {
                     break;
                 }
@@ -220,22 +220,26 @@ function sortedByTime(CFE) {
 
     inputPhase();
 
-    while (modelTime < WORKING_DAY_TIME) {
+
+    while (true) {
         timingCorrectionPhase();
-        console.log('-------------------------------------------');
-        console.log('Фаза коррекции таймера:');
-        console.log('Модельное время:', modelTime);
-        console.log('ЦТС', CCE);
-        console.log('ЦБС', CFE);
+        if (modelTime > WORKING_DAY_TIME) {
+            break;
+        }
+        // console.log('-------------------------------------------');
+        // console.log('Фаза коррекции таймера:');
+        // console.log('Модельное время:', modelTime);
+        // console.log('ЦТС', CCE);
+        // console.log('ЦБС', CFE);
         viewingPhase();
-        console.log('Фаза просмотра:');
-        console.log('ЦТС', CCE);
-        console.log('ЦБС', CFE);
-        console.log('----');
+        // console.log('Фаза просмотра:');
+        // console.log('ЦТС', CCE);
+        // console.log('ЦБС', CFE);
+        // console.log('----');
 
     }
 
-    console.log('LEAVE', blocks);
+    console.log(blocks);
     console.log('QRequest:', QRequest.results());
     console.log('QWaitCar:', QWaitCar.results());
     console.log('QTripTime:', QTripTime.results());

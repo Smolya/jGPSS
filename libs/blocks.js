@@ -277,13 +277,18 @@ class TEST extends Block {
 
         let isTest = false;
 
+        const B = typeof b === 'string' ? transact.params[b] : b
+
         switch (mode) {
             case 'E':
-                isTest = transact.params[a] === transact.params[b];
+                isTest = transact.params[a] === B;
                 break;
             case 'G':
-                isTest = transact.params[a] > transact.params[b];
+                isTest = transact.params[a] > B;
                 break;
+
+            case 'NE':
+                isTest = transact.params[a] !== B;
         }
 
         if (isTest) {
