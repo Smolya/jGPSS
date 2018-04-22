@@ -9,13 +9,13 @@ let CCE = [];
 let CFE = [];
 const FREE = [];
 
-const CARS = new Storage(200);
+const CARS = new Storage(3);
 
 const QRequest = new Queue();
 const QWaitCar = new Queue();
 const QTripTime = new Queue();
 
-const WORKING_DAY_TIME = 480;
+const WORKING_DAY_TIME = 6;
 
 function sortedByTime(CFE) {
     return _.sortBy(CFE, (transact) => transact.time);
@@ -94,6 +94,10 @@ function sortedByTime(CFE) {
        return label;
     });
 
+    const nameBlocks = model.map(({name}) => {
+        return name;
+    });
+
     const inputPhase = function() {
         model.forEach((block, idBlock) => {
             if (block['name'] === 'GENERATE') {
@@ -128,6 +132,10 @@ function sortedByTime(CFE) {
         for (let i = 0; i < copyCCE.length; i++) {
             let currentTransact = copyCCE[i];
 
+            console.log('---------');
+            console.log(currentTransact);
+            console.log('STAGES:');
+
             let {
                 time,
                 currentBlock,
@@ -150,12 +158,11 @@ function sortedByTime(CFE) {
             // продолжить продвижение транзакта по модели
             while (true) {
 
-                const id = currentTransact.id;
                 time = currentTransact.time;
                 currentBlock = currentTransact.currentBlock;
                 nextBlock = currentTransact.nextBlock;
 
-                //console.log(id, nextBlock);
+                console.log(nameBlocks[nextBlock], nextBlock);
 
                 const {
                     isNextBlock,
@@ -174,11 +181,9 @@ function sortedByTime(CFE) {
                 }
 
                 if (isAdvance) {
-                    //console.log('ADVANCE');
                     _.remove(CCE, (value) => value.id === currentTransact.id);
                     CFE.push(currentTransact);
                     CFE = sortedByTime(CFE);
-                    //console.log(CFE);
                 }
 
                 // delay - остановка в связи с занятостью устройства - не убирать транзакт и ЦТС
@@ -193,7 +198,6 @@ function sortedByTime(CFE) {
 
                 if (!isNextBlock) {
                     _.remove(CCE, (value) => value.id === currentTransact.id);
-                    //console.log('CCE', CCE);
                     break;
                 }
 
@@ -208,7 +212,6 @@ function sortedByTime(CFE) {
 
                 if (isLeave) {
                     _.remove(CCE, (value) => value.id === currentTransact.id);
-                    //console.log('FREE', FREE, CCE);
                 }
             }
 
@@ -219,15 +222,16 @@ function sortedByTime(CFE) {
 
     while (modelTime < WORKING_DAY_TIME) {
         timingCorrectionPhase();
-        // console.log('Модельное время:', modelTime);
-        // console.log('Фаза коррекции таймера:');
-        // console.log('ЦТС', CCE);
-        // console.log('ЦБС', CFE);
+        console.log('-------------------------------------------');
+        console.log('Фаза коррекции таймера:');
+        console.log('Модельное время:', modelTime);
+        console.log('ЦТС', CCE);
+        console.log('ЦБС', CFE);
         viewingPhase();
-        // console.log('Фаза просмотра:');
-        // console.log('ЦТС', CCE);
-        // console.log('ЦБС', CFE);
-        // console.log('----');
+        console.log('Фаза просмотра:');
+        console.log('ЦТС', CCE);
+        console.log('ЦБС', CFE);
+        console.log('----');
 
     }
 
